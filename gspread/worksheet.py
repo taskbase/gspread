@@ -1681,6 +1681,21 @@ class Worksheet:
 
         return note
 
+    def get_notes(self, cell):
+        absolute_cell = absolute_range_name(self.title, cell)
+        url = SPREADSHEET_URL % (self.spreadsheet.id)
+        params = {"ranges": absolute_cell, "fields": "sheets/data/rowData/values/note"}
+        response = self.client.request("get", url, params=params)
+        response.raise_for_status()
+        response_json = response.json()
+
+        try:
+            notes = response_json["sheets"][0]["data"][0]["rowData"]
+        except (IndexError, KeyError):
+            notes = list()
+
+        return notes
+
     def update_note(self, cell, content):
         """Update the content of the note located at `cell`.
 
